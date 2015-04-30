@@ -6,6 +6,7 @@
 
 package tiffy;
 
+import java.awt.BorderLayout;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -39,7 +40,7 @@ public class Tiffy {
 		
 		//initialize window
 		JFrame frame = new JFrame("tiffy");  
-        frame.setSize(1280,1024);
+        frame.setSize(640,480);
        
 		
 		//set path for runtime, create directory with options in homedirectory
@@ -130,8 +131,9 @@ public class Tiffy {
         Runtime rt = Runtime.getRuntime();
         Process proc = null;
 		try {
-			//proc = rt.exec(binary_path+" -i E:\\Filme\\INTERSTELLAR.mkv -vcodec libx264 F:\\test.mkv");
 			proc = rt.exec(binary_path+" -i E:\\Filme\\INTERSTELLAR.mkv");
+			//proc = rt.exec(binary_path+" -i E:\\Filme\\TOKYO_GODFATHERS.mkv");
+			//proc = rt.exec(binary_path+" -i E:\\Filme\\THE_SILENCE_OF_THE_LAMBS.mkv");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -143,14 +145,8 @@ public class Tiffy {
         BufferedReader stdError = new BufferedReader(new 
              InputStreamReader(proc.getErrorStream()));
 
-
         String l=null;
-        JTextArea textfeld = new JTextArea(100, 80);
-        JScrollPane scrollpane = new JScrollPane(textfeld);   
-        JPanel panel = new JPanel();
-        panel.add(scrollpane);
-        frame.add(panel);
-        
+       
         ArrayList<String> audio_streams = new ArrayList<String>();
         ArrayList<String> video_streams = new ArrayList<String>();
         
@@ -173,20 +169,54 @@ public class Tiffy {
 				}
 			}
 		} catch (IOException e) {
-			//TODO
 			e.printStackTrace();
 		}
+
+        JPanel video_panel = new JPanel(new BorderLayout());
+        JPanel audio_panel = new JPanel(new BorderLayout());
         
-        for (int i = 0; i < audio_streams.size();++i){
-        	textfeld.append(audio_streams.get(i));
-        	textfeld.append("\n");
+        JLabel audio_label = new JLabel("Verfügbare Audiospuren");
+        JLabel video_label = new JLabel("Verfügbare Videospuren");
+        
+        video_panel.add(video_label,BorderLayout.NORTH);
+        audio_panel.add(audio_label,BorderLayout.NORTH);
+        
+        DefaultListModel<JCheckBox> audio_model = new DefaultListModel<JCheckBox>();
+        JCheckBoxList checkBoxList_audio = new JCheckBoxList(audio_model);
+        
+        DefaultListModel<JCheckBox> video_model = new DefaultListModel<JCheckBox>();
+        JCheckBoxList checkBoxList_video = new JCheckBoxList(video_model);
+        
+        int cnt_audio = 0, cnt_video = 0;
+        for (int i = 0; i < streams.size(); ++i){
+        	if(streams.get(i).getClass() == AudioStream.class){
+        		AudioStream s = (AudioStream) streams.get(i);
+        		JCheckBox tmp = new JCheckBox(s.representation());
+        		audio_model.add(cnt_audio++, tmp);
+        	} else if (streams.get(i).getClass() == VideoStream.class){
+        		VideoStream s = (VideoStream) streams.get(i);
+        		JCheckBox tmp = new JCheckBox(s.representation());
+        		video_model.add(cnt_video++, tmp);
+        	}
+        	
         }
-        for (int i = 0; i < video_streams.size();++i){
-        	textfeld.append(video_streams.get(i));
-        	textfeld.append("\n");
-        }
         
+        audio_panel.add(checkBoxList_audio);
+        video_panel.add(checkBoxList_video);
         
+        JSplitPane splitpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+
+        splitpane.setLeftComponent(video_panel);
+        splitpane.setRightComponent(audio_panel);
+        
+        JSplitPane menupane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        JPanel menu_panel = new JPanel();
+  
+        menupane.setTopComponent(menu_panel);
+        menupane.setBottomComponent(splitpane);
+        
+        frame.add(menupane);
+        frame.setVisible(true);
         
 	}
 	

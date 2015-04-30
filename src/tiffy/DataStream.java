@@ -5,8 +5,11 @@ public abstract class DataStream {
 		String codec; //codec
 				
 		public abstract void print();
+		public abstract String representation();
 		
 		DataStream(int _a, int _b, String _codec){
 			a = _a; b = _b; codec = _codec;
 		}
+		
+		
 }

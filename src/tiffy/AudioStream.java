@@ -3,7 +3,7 @@ package tiffy;
 public class AudioStream extends DataStream {
 	String lang; //language string
 	int bitrate; //bitrate in kb/s
-	
+		
 	AudioStream(String key) {
 		super(-1,-1,"unknown");
 		lang = "unknown"; bitrate = -1;
@@ -19,9 +19,13 @@ public class AudioStream extends DataStream {
 				int lap = ab[1].indexOf(")");
 
 				a = new Integer(ab[0]).intValue();
-				b = new Integer(ab[1].substring(0, fap)).intValue();
-				lang = ab[1].substring(fap+1, lap);
-
+				if(fap != -1){
+					b = new Integer(ab[1].substring(0, fap)).intValue();
+					lang = ab[1].substring(fap+1, lap);
+				}
+				else 
+					b = new Integer(ab[1]).intValue();
+				
 				String[] tmp = ab[3].split("\\(");
 				codec = tmp[0];
 			} else if (parts[i].contains("kb/s")) {
@@ -31,6 +35,8 @@ public class AudioStream extends DataStream {
 		}
 		//this.print(); System.out.println();
 	}
+	
+	
 	
 	public void print(){
 		System.out.println("AudioStream: "+a+":"+b);
@@ -49,5 +55,13 @@ public class AudioStream extends DataStream {
 			if(s.charAt(i) == c) res[cnt++]=i;
 		}
 		return res;
+	}
+
+
+
+	@Override
+	public String representation() {
+		String r = lang+" "+codec;
+		return r;
 	}
 }
