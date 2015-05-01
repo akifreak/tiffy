@@ -149,7 +149,7 @@ public class Tiffy {
         Runtime rt = Runtime.getRuntime();
         Process proc = null;
 		try {
-			proc = rt.exec(binary_path+" -i "+movie);
+			proc = rt.exec(binary_path+" -i "+"\""+movie+"\"");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
