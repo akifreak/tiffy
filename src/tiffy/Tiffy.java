@@ -68,22 +68,27 @@ public class Tiffy {
         String line;
         String binary_path = null;
         //exe defined by [binary]
+        ArrayList<String> codecs = new ArrayList<String>();
         try {
             InputStream fis = new FileInputStream(homedir+"\\tiffy\\settings.ini");
             InputStreamReader isr = new InputStreamReader(fis, Charset.forName("UTF-8"));
             @SuppressWarnings("resource")
 			BufferedReader br = new BufferedReader(isr);
-            
+            boolean binary_found = false;
             while ((line = br.readLine()) != null) {
                 System.out.println(line);
-                if(line.length() >= 10 ){
+                if(!binary_found && line.length() >= 10 ){
                 	String compare = line.substring(0, 8);
                 	String tmp = line.substring(line.length()-10, line.length());
                 	if(compare.equals("[binary]") && tmp.equals("ffmpeg.exe")){
                 		binary_path = line.substring(8,line.length());
-                		break;
+                		binary_found = true;
                 	}
-
+                }
+                
+                if(line.startsWith("[codec]")){
+                	String tmp = line.substring(7, line.length());
+                	codecs.add(tmp);
                 }
                 
             }
@@ -91,7 +96,7 @@ public class Tiffy {
 			//TODO
 			e.printStackTrace();
 		}
-
+        
     	//ask for ffmpeg binary path
         while(binary_path == null){
         	System.out.println("binary not found");
@@ -225,6 +230,21 @@ public class Tiffy {
         audio_panel.add(checkBoxList_audio);
         video_panel.add(checkBoxList_video);
         
+        JMenuBar bar = new JMenuBar();
+        JMenu mode_selection = new JMenu("copy");
+        JSeparator sep = new JSeparator();   
+  
+        ArrayList<JMenuItem> items = new ArrayList<JMenuItem>();
+        for (int j = 0; j < codecs.size();++j){
+			JMenuItem tmp = new JMenuItem(codecs.get(j));
+			items.add(tmp);
+			mode_selection.add(tmp); 
+			mode_selection.add(sep);
+        }
+        
+        bar.add(mode_selection);
+        frame.setJMenuBar(bar);
+        
         JSplitPane splitpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 
         splitpane.setLeftComponent(video_panel);
@@ -233,23 +253,23 @@ public class Tiffy {
         JSplitPane menupane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         JPanel menu_panel = new JPanel();
         JButton button = new JButton(); button.setText("Konvertieren nach");
-        
+        JButton stop_button = new JButton(); stop_button.setText("Stop");
         menu_panel.add(button);
+        menu_panel.add(stop_button);
         JTextArea textfeld = new JTextArea(40, 50);
-     /*   textfeld.setLineWrap(true);
-        textfeld.setWrapStyleWord(true);*/
         JScrollPane scrollpane = new JScrollPane(textfeld);      
         menu_panel.add(scrollpane);
         
         menupane.setTopComponent(splitpane);
         menupane.setBottomComponent(menu_panel);
         
+        new MListener(items,mode_selection);
         
         PrintStream printStream = new PrintStream(new CustomOutputStream(textfeld)); 
         System.setOut(printStream);
         System.setErr(printStream);
-        
-        new Converter(frame,button,jcb,binary_path,movie);
+
+        new Converter(frame,button,stop_button,mode_selection,jcb,binary_path,movie);
         
         frame.add(menupane);
         frame.setVisible(true);

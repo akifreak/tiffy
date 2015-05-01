@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
@@ -35,10 +36,10 @@ public class Ffmpeg extends Thread {
     }
 	
 	String binary_path, input, command, output;
-	JFrame frame; 
+	JFrame frame; JButton button;
 	
-	Ffmpeg (String b, String i, String c, String o, JFrame f) {
-		binary_path = b; input = i; command = c; output = o; frame = f;
+	Ffmpeg (String b, String i, String c, String o, JFrame f, JButton bu) {
+		binary_path = b; input = i; command = c; output = o; frame = f; button = bu;
 	}
 
 	 public void run() {
@@ -46,7 +47,7 @@ public class Ffmpeg extends Thread {
 				Runtime rt = Runtime.getRuntime();
 		        Process process = null;
 				try {
-					process = rt.exec(binary_path+" -i "+input+" "+command+" "+output);
+					process = rt.exec(binary_path+" -i "+"\""+input+"\""+" "+command+" "+"\""+output+"\"");
 				} catch (IOException ex) {
 					ex.printStackTrace();
 				}
@@ -55,6 +56,9 @@ public class Ffmpeg extends Thread {
 	            errorHandler.start();
 				InputHandler inputHandler = new InputHandler(process.getInputStream(), "Output Stream");
 				inputHandler.start();
+				
+				StopButton actioner = new StopButton(button,process);				
+				
 	            try {
 	                process.waitFor();
 	            } catch (InterruptedException ex) {
@@ -64,12 +68,16 @@ public class Ffmpeg extends Thread {
 
 				process.destroy();
 				
+				button.removeActionListener(actioner);
+				
 				JOptionPane.showMessageDialog(frame, "Done");
 				
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
+			
+			
      }
 	
 }
