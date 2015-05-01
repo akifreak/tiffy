@@ -140,6 +140,8 @@ public class Tiffy {
      			} catch (IOException e) {
      				e.printStackTrace();
      			}
+             } else {
+            	 System.exit(0);
              }
         }
         
@@ -199,7 +201,7 @@ public class Tiffy {
         DefaultListModel<JCheckBox> video_model = new DefaultListModel<JCheckBox>();
         JCheckBoxList checkBoxList_video = new JCheckBoxList(video_model);
         
-        ArrayList<JCheckBox> jcb = new ArrayList<JCheckBox>();
+        ArrayList<Pair<JCheckBox, DataStream> > jcb = new ArrayList<Pair<JCheckBox, DataStream> >();
         
         int cnt_audio = 0, cnt_video = 0;
         for (int i = 0; i < streams.size(); ++i){
@@ -207,12 +209,12 @@ public class Tiffy {
         		AudioStream s = (AudioStream) streams.get(i);
         		JCheckBox tmp = new JCheckBox(s.representation());
         		audio_model.add(cnt_audio++, tmp);
-        		jcb.add(tmp);
+        		jcb.add(new Pair<JCheckBox, DataStream>(tmp,s));
         	} else if (streams.get(i).getClass() == VideoStream.class){
         		VideoStream s = (VideoStream) streams.get(i);
         		JCheckBox tmp = new JCheckBox(s.representation());
         		video_model.add(cnt_video++, tmp);
-        		jcb.add(tmp);
+        		jcb.add(new Pair<JCheckBox, DataStream>(tmp,s));
         	}
         	
         }
@@ -228,7 +230,8 @@ public class Tiffy {
         JSplitPane menupane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         JPanel menu_panel = new JPanel();
         JButton button = new JButton(); button.setText("Klick mich");
-        new Converter(button,jcb);
+        String movie_output = "F:\\test.mkv";
+        new Converter(frame,button,jcb,binary_path,movie,movie_output);
         menu_panel.add(button);
   
         menupane.setTopComponent(menu_panel);
