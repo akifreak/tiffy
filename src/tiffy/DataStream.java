@@ -3,7 +3,7 @@ package tiffy;
 public abstract class DataStream {
 		int a,b; //id 0:0
 		String codec; //codec
-				
+		
 		public abstract void print();
 		public abstract String representation();
 		

@@ -128,14 +128,26 @@ public class Tiffy {
         
         frame.setVisible(true);
         
+        JFileChooser pc = new JFileChooser();   
+        pc.setDialogTitle("Select Movie");
+        
+        String movie = "";
+        while(!new File(movie).isFile()){
+        	 if(pc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION)
+             {
+                 try {
+                 	movie = pc.getSelectedFile().getCanonicalPath();
+     			} catch (IOException e) {
+     				e.printStackTrace();
+     			}
+             }
+        }
+        
         Runtime rt = Runtime.getRuntime();
         Process proc = null;
 		try {
-			proc = rt.exec(binary_path+" -i E:\\Filme\\INTERSTELLAR.mkv");
-			//proc = rt.exec(binary_path+" -i E:\\Filme\\TOKYO_GODFATHERS.mkv");
-			//proc = rt.exec(binary_path+" -i E:\\Filme\\THE_SILENCE_OF_THE_LAMBS.mkv");
+			proc = rt.exec(binary_path+" -i "+movie);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -187,16 +199,20 @@ public class Tiffy {
         DefaultListModel<JCheckBox> video_model = new DefaultListModel<JCheckBox>();
         JCheckBoxList checkBoxList_video = new JCheckBoxList(video_model);
         
+        ArrayList<JCheckBox> jcb = new ArrayList<JCheckBox>();
+        
         int cnt_audio = 0, cnt_video = 0;
         for (int i = 0; i < streams.size(); ++i){
         	if(streams.get(i).getClass() == AudioStream.class){
         		AudioStream s = (AudioStream) streams.get(i);
         		JCheckBox tmp = new JCheckBox(s.representation());
         		audio_model.add(cnt_audio++, tmp);
+        		jcb.add(tmp);
         	} else if (streams.get(i).getClass() == VideoStream.class){
         		VideoStream s = (VideoStream) streams.get(i);
         		JCheckBox tmp = new JCheckBox(s.representation());
         		video_model.add(cnt_video++, tmp);
+        		jcb.add(tmp);
         	}
         	
         }
@@ -211,6 +227,9 @@ public class Tiffy {
         
         JSplitPane menupane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         JPanel menu_panel = new JPanel();
+        JButton button = new JButton(); button.setText("Klick mich");
+        new Converter(button,jcb);
+        menu_panel.add(button);
   
         menupane.setTopComponent(menu_panel);
         menupane.setBottomComponent(splitpane);
