@@ -15,6 +15,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ public class Tiffy {
 		
 		//initialize window
 		JFrame frame = new JFrame("tiffy");  
-        frame.setSize(640,480);
+        frame.setSize(650,850);
        
 		
 		//set path for runtime, create directory with options in homedirectory
@@ -185,6 +186,8 @@ public class Tiffy {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+        
+        proc.destroy();
 
         JPanel video_panel = new JPanel(new BorderLayout());
         JPanel audio_panel = new JPanel(new BorderLayout());
@@ -229,13 +232,24 @@ public class Tiffy {
         
         JSplitPane menupane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         JPanel menu_panel = new JPanel();
-        JButton button = new JButton(); button.setText("Klick mich");
-        String movie_output = "F:\\test.mkv";
-        new Converter(frame,button,jcb,binary_path,movie,movie_output);
+        JButton button = new JButton(); button.setText("Konvertieren nach");
+        
         menu_panel.add(button);
-  
-        menupane.setTopComponent(menu_panel);
-        menupane.setBottomComponent(splitpane);
+        JTextArea textfeld = new JTextArea(40, 50);
+     /*   textfeld.setLineWrap(true);
+        textfeld.setWrapStyleWord(true);*/
+        JScrollPane scrollpane = new JScrollPane(textfeld);      
+        menu_panel.add(scrollpane);
+        
+        menupane.setTopComponent(splitpane);
+        menupane.setBottomComponent(menu_panel);
+        
+        
+        PrintStream printStream = new PrintStream(new CustomOutputStream(textfeld)); 
+        System.setOut(printStream);
+        System.setErr(printStream);
+        
+        new Converter(frame,button,jcb,binary_path,movie);
         
         frame.add(menupane);
         frame.setVisible(true);

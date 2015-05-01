@@ -2,63 +2,48 @@ package tiffy;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 
 public class Converter extends JFrame implements ActionListener {
 
-	class InputHandler extends Thread {
 
-        InputStream input_;
-
-        InputHandler(InputStream input, String name) {
-            super(name);
-            input_ = input;
-        }
-
-        public void run() {
-            try {
-                int c;
-                while ((c = input_.read()) != -1) {
-                    System.out.write(c);
-                }
-            } catch (Throwable t) {
-                t.printStackTrace();
-            }
-        }
-
-    }
-	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -2949602210951433146L;
 	JButton b;
 	ArrayList<Pair<JCheckBox, DataStream> > jcb;
-	String binary_path,input,output;
+	String binary_path,input, output;
 	JFrame frame;
 	
-	Converter (JFrame f, JButton _b,  ArrayList<Pair<JCheckBox, DataStream> > _jcb, String bin, String in, String out) {
-		b = _b; jcb = _jcb; binary_path = bin; input = in; output = out; frame = f;
+	Converter (JFrame f, JButton _b, ArrayList<Pair<JCheckBox, DataStream> > _jcb, String bin, String in) {
+		b = _b; jcb = _jcb; binary_path = bin; input = in; frame = f; output = null;
 		b.addActionListener(this);
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == b) {
-			System.out.println("geklickt");
+				System.out.println("geklickt");
+			
+				JFileChooser pc = new JFileChooser();   
+			    pc.setDialogTitle("Select Movie");
+			
+				if(pc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION)
+			    {
+		         try {
+		         	output = pc.getSelectedFile().getCanonicalPath();
+					} catch (IOException ex) {
+						ex.printStackTrace();
+					}
+			     }
+			
 			StringBuilder command = new StringBuilder();
 			
 			//generate default mapping
@@ -88,39 +73,9 @@ public class Converter extends JFrame implements ActionListener {
 					}
 				}
 			}
-			System.out.println(binary_path+" -i "+input+" "+command.toString()+" "+output);
 			
-			try {
-				Runtime rt = Runtime.getRuntime();
-		        Process process = null;
-				try {
-					process = rt.exec(binary_path+" -i "+input+" "+command.toString()+" "+output);
-				} catch (IOException ex) {
-					ex.printStackTrace();
-				}
-
-				InputHandler errorHandler = new
-						InputHandler(process.getErrorStream(), "Error Stream");
-						            errorHandler.start();
-						            InputHandler inputHandler = new
-						InputHandler(process.getInputStream(), "Output Stream");
-						            inputHandler.start();
-						            try {
-						                process.waitFor();
-						            } catch (InterruptedException ex) {
-						                throw new IOException("process interrupted");
-						            }
-						            System.out.println("exit code: " + process.exitValue());
-
-				process.destroy();
-				
-				JOptionPane.showMessageDialog(frame, "Done");
-				
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-	        
+			Ffmpeg ffmpeg = new Ffmpeg(binary_path, input, command.toString(), output, frame);
+			ffmpeg.start();	        
 		}
 	}
 
