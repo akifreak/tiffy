@@ -277,6 +277,7 @@ public class Tiffy {
        
         ArrayList<String> audio_streams = new ArrayList<String>();
         ArrayList<String> video_streams = new ArrayList<String>();
+        ArrayList<String> subitle_streams = new ArrayList<String>();
         
         ArrayList<DataStream> streams = new ArrayList<DataStream>();
         
@@ -292,6 +293,11 @@ public class Tiffy {
 						video_streams.add(l);
 						streams.add(new VideoStream(l));
 					}
+					
+					if(l.contains("Subtitle")){
+						subitle_streams.add(l);
+						streams.add(new SubtitleStream(l));
+					}
 						
 					
 				}
@@ -304,12 +310,15 @@ public class Tiffy {
 
         JPanel video_panel = new JPanel(new BorderLayout());
         JPanel audio_panel = new JPanel(new BorderLayout());
+        JPanel subtitle_panel = new JPanel(new BorderLayout());
         
         JLabel audio_label = new JLabel("Verfügbare Audiospuren");
         JLabel video_label = new JLabel("Verfügbare Videospuren");
+        JLabel subtitle_label = new JLabel("Verfügbare Untertitel");
         
         video_panel.add(video_label,BorderLayout.NORTH);
         audio_panel.add(audio_label,BorderLayout.NORTH);
+        subtitle_panel.add(subtitle_label,BorderLayout.NORTH);
         
         DefaultListModel<JCheckBox> audio_model = new DefaultListModel<JCheckBox>();
         JCheckBoxList checkBoxList_audio = new JCheckBoxList(audio_model);
@@ -317,9 +326,12 @@ public class Tiffy {
         DefaultListModel<JCheckBox> video_model = new DefaultListModel<JCheckBox>();
         JCheckBoxList checkBoxList_video = new JCheckBoxList(video_model);
         
+        DefaultListModel<JCheckBox> subtitle_model = new DefaultListModel<JCheckBox>();
+        JCheckBoxList checkBoxList_subtitle = new JCheckBoxList(subtitle_model);
+        
         ArrayList<Pair<JCheckBox, DataStream> > jcb = new ArrayList<Pair<JCheckBox, DataStream> >();
         
-        int cnt_audio = 0, cnt_video = 0;
+        int cnt_audio = 0, cnt_video = 0, cnt_subtitle = 0;
         for (int i = 0; i < streams.size(); ++i){
         	if(streams.get(i).getClass() == AudioStream.class){
         		AudioStream s = (AudioStream) streams.get(i);
@@ -331,12 +343,17 @@ public class Tiffy {
         		JCheckBox tmp = new JCheckBox(s.representation());
         		video_model.add(cnt_video++, tmp);
         		jcb.add(new Pair<JCheckBox, DataStream>(tmp,s));
+        	} else if (streams.get(i).getClass() == SubtitleStream.class){
+        		SubtitleStream s = (SubtitleStream) streams.get(i);
+        		JCheckBox tmp = new JCheckBox(s.representation());
+        		subtitle_model.add(cnt_subtitle++, tmp);
+        		jcb.add(new Pair<JCheckBox, DataStream>(tmp,s));
         	}
-        	
         }
         
         audio_panel.add(checkBoxList_audio);
         video_panel.add(checkBoxList_video);
+        subtitle_panel.add(checkBoxList_subtitle);
         
         JMenuBar bar = new JMenuBar();
         JMenu mode_selection = new JMenu("copy");
@@ -354,9 +371,14 @@ public class Tiffy {
         frame.setJMenuBar(bar);
         
         JSplitPane splitpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        
+        JSplitPane trisplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 
         splitpane.setLeftComponent(video_panel);
         splitpane.setRightComponent(audio_panel);
+        
+        trisplit.setLeftComponent(splitpane);
+        trisplit.setRightComponent(subtitle_panel);
         
         JSplitPane menupane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         JPanel menu_panel = new JPanel();
@@ -368,7 +390,7 @@ public class Tiffy {
         JScrollPane scrollpane = new JScrollPane(textfeld);      
         menu_panel.add(scrollpane);
         
-        menupane.setTopComponent(splitpane);
+        menupane.setTopComponent(trisplit);
         menupane.setBottomComponent(menu_panel);
         
         new MListener(items,mode_selection);

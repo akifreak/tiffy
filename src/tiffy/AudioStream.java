@@ -36,8 +36,6 @@ public class AudioStream extends DataStream {
 		//this.print(); System.out.println();
 	}
 	
-	
-	
 	public void print(){
 		System.out.println("AudioStream: "+a+":"+b);
 		System.out.println("Language: "+lang);

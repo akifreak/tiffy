@@ -57,6 +57,9 @@ public class Converter extends JFrame implements ActionListener {
 					} else if(tmp.second().getClass() == VideoStream.class){
 						//handle video
 						command.append("-map "+tmp.second().a+":"+tmp.second().b+" ");
+					} else if(tmp.second().getClass() == SubtitleStream.class){
+						//handle video
+						command.append("-map "+tmp.second().a+":"+tmp.second().b+" ");
 					}
 				}
 			}
@@ -69,16 +72,20 @@ public class Converter extends JFrame implements ActionListener {
 				if(tmp.first().isSelected()){		
 					if(tmp.second().getClass() == AudioStream.class){
 						//handle audio
-						command.append("-c:a:"+tmp.second().b+" "+codec+" ");
+						command.append("-c:a:"+tmp.second().b+" copy ");
 					} else if(tmp.second().getClass() == VideoStream.class){
 						//handle video
 						command.append("-c:v:"+tmp.second().b+" "+codec+" ");
+					} else if(tmp.second().getClass() == SubtitleStream.class){
+						//handle video
+						command.append("-c:s:"+tmp.second().b+" copy ");
 					}
+					
 				}
 			}
 			
 			Ffmpeg ffmpeg = new Ffmpeg(binary_path, input, command.toString(), output, frame, stop);
-			ffmpeg.start();	        
+			ffmpeg.start();
 		}
 	}
 
