@@ -98,6 +98,9 @@ public class Tiffy {
 	private static void appendSetting(String file, String code, String option){
 		String line;
 		ArrayList<String> file_list = new ArrayList<String>();
+		
+		System.out.println("appending "+code+option);
+		
 		InputStream fis = null;
 		try {
 			fis = new FileInputStream(file);
@@ -123,6 +126,7 @@ public class Tiffy {
 			for(int i = 0; i < file_list.size();++i){
 				output.append(file_list.get(i)+"\n");
 			}
+			output.append(code+option);
 			output.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -172,28 +176,36 @@ public class Tiffy {
         
         String binary_path = null;
         String last_dir = null;
+        boolean last_dir_found = false;
+        boolean binary_path_found = false;
         ArrayList<String> codecs = new ArrayList<String>();
         try {        	
         	String[] tmp = getSetting(ffmpeg_settings_path,"[binary]");
         	if(tmp.length >= 1){
         		binary_path = tmp[0];
+        		binary_path_found = true;
         	}
         	
         	tmp = getSetting(ffmpeg_settings_path,"[lastdir]");
         	if(tmp.length >= 1){
         		last_dir = tmp[0];
+        		last_dir_found = true;
         	}
         	
         	tmp = getSetting(ffmpeg_settings_path,"[codec]");
-        	for(int f = 0; f < tmp.length; ++f)
-        		codecs.add(tmp[f]);
+        	if(tmp.length == 0) codecs.add("copy");
+        	else {
+            	for(int f = 0; f < tmp.length; ++f)
+            		codecs.add(tmp[f]);
+        	}
+
         	
         } catch (IOException e) {
 			e.printStackTrace();
 		}
         
     	//ask for ffmpeg binary path
-        while(binary_path == null){
+        while(!binary_path_found){
         	System.out.println("binary not found");
         	JFileChooser pc = new JFileChooser();   
             pc.setDialogTitle("Select ffmpeg.exe");
@@ -207,24 +219,21 @@ public class Tiffy {
 				}
 	        } 
             
-            String tmp = binary_path.substring(binary_path.length()-10, binary_path.length());
-            if(!tmp.equals("ffmpeg.exe")){
+            if(!binary_path.contains("\\ffmpeg.exe")){
             	binary_path = null;
             	JOptionPane.showMessageDialog(frame, "Please select the ffmpeg.exe");
             	continue;
             }
             
-            changeSetting(ffmpeg_settings_path,"[binary]",binary_path);
-
+            appendSetting(ffmpeg_settings_path,"[binary]",binary_path);
+            binary_path_found = true;
         }
-
-        //System.out.println(binary_path);
         
         frame.setVisible(true);
         
         JFileChooser pc = new JFileChooser();   
         pc.setDialogTitle("Select Movie");
-        if (last_dir != null) pc.setCurrentDirectory(new File(last_dir));        
+        if (last_dir_found) pc.setCurrentDirectory(new File(last_dir));        
         String movie = "";
         while(!new File(movie).isFile()){
         	 if(pc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION)
@@ -237,8 +246,13 @@ public class Tiffy {
                  		tmp.append(parts[i]+"\\");
                  	} last_dir = tmp.toString();
                  	
-                 	changeSetting(ffmpeg_settings_path,"[lastdir]",last_dir);
-
+                 	if(last_dir_found){
+                 		changeSetting(ffmpeg_settings_path,"[lastdir]",last_dir);
+                 	}
+                 	else{
+                 		System.out.println("appending");
+                 		appendSetting(ffmpeg_settings_path,"[lastdir]",last_dir);
+                 	}
                  	
      			} catch (IOException e) {
      				e.printStackTrace();
