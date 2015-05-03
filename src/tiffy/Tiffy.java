@@ -44,6 +44,7 @@ public class Tiffy {
 		//initialize window
 		JFrame frame = new JFrame("tiffy");  
         frame.setSize(650,850);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
        
 		
 		//set path for runtime, create directory with options in homedirectory
