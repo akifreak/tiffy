@@ -43,6 +43,10 @@ public class Ffmpeg extends Thread {
 	}
 
 	 public void run() {
+		 
+		 
+		 	System.out.println(command);
+		 
 			try {
 				Runtime rt = Runtime.getRuntime();
 		        Process process = null;
