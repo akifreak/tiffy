@@ -37,13 +37,14 @@ public class Converter extends JFrame implements ActionListener {
 			
 			String tmp_setting[] = null;
 			try {
-				tmp_setting = Settings.getSetting(settings,"[convert_to_dir]");
+				//tmp_setting = Settings.getSetting(settings,"[convert_to_dir]");
+				tmp_setting = Settings.getSetting(settings,"[lastdir]");
 			} catch (IOException e1) {
 				e1.printStackTrace();
 				return;
 			}
 			JFileChooser pc = new JFileChooser();   
-			pc.setDialogTitle("Select Movie");
+			pc.setDialogTitle("Select Target");
 			if(tmp_setting.length >= 1){
 				pc.setCurrentDirectory(new File(tmp_setting[0]));
 			} 
@@ -56,9 +57,9 @@ public class Converter extends JFrame implements ActionListener {
 					ex.printStackTrace();
 					return;
 				}
-			 }
+			 } else return;
 			
-			StringBuilder tmp_builder = new StringBuilder("");
+			/*StringBuilder tmp_builder = new StringBuilder("");
          	String[] parts = output.split("\\\\");
          	for(int i = 0; i < parts.length-1; ++i){
          		tmp_builder.append(parts[i]+"\\");
@@ -69,7 +70,7 @@ public class Converter extends JFrame implements ActionListener {
          	} else {
          		Settings.changeSetting(settings, "[convert_to_dir]", tmp_builder.toString());
         		
-         	}
+         	}*/
          		
 			
 			StringBuilder command = new StringBuilder();
@@ -100,16 +101,6 @@ public class Converter extends JFrame implements ActionListener {
 			for (int i = 0; i < jcb.size();++i){
 				Pair<JCheckBox, DataStream> tmp = jcb.get(i);
 				if(tmp.first().isSelected()){		
-					/*if(tmp.second().getClass() == AudioStream.class){
-						//handle audio
-						command.append("-c:a:"+tmp.second().b+" copy ");
-					} else if(tmp.second().getClass() == VideoStream.class){
-						//handle video
-						command.append("-c:v:"+tmp.second().b+" "+codec+" ");
-					} else if(tmp.second().getClass() == SubtitleStream.class){
-						//handle video
-						command.append("-c:s:"+tmp.second().b+" copy ");
-					}*/
 					//except the video streams
 					if(tmp.second().getClass() == VideoStream.class){
 						//handle video
@@ -117,8 +108,6 @@ public class Converter extends JFrame implements ActionListener {
 					}
 				}
 			}
-						
-			//System.out.println(command.toString());
 			
 			Ffmpeg ffmpeg = new Ffmpeg(binary_path, input, command.toString(), output, frame, stop);
 			ffmpeg.start();
