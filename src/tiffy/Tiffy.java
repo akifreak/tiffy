@@ -8,17 +8,10 @@ package tiffy;
 
 import java.awt.BorderLayout;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.io.Writer;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 
 import javax.swing.*;
@@ -208,11 +201,9 @@ public class Tiffy {
         
         JLabel audio_label = new JLabel("Verfügbare Audiospuren");
         JLabel video_label = new JLabel("Verfügbare Videospuren");
-        //JLabel subtitle_label = new JLabel("Verfügbare Untertitel");
         
         video_panel.add(video_label,BorderLayout.NORTH);
         audio_panel.add(audio_label,BorderLayout.NORTH);
-        //subtitle_panel.add(subtitle_label,BorderLayout.NORTH);
         
         DefaultListModel<JCheckBox> audio_model = new DefaultListModel<JCheckBox>();
         JCheckBoxList checkBoxList_audio = new JCheckBoxList(audio_model);
@@ -223,7 +214,6 @@ public class Tiffy {
         ArrayList<DefaultListModel<JCheckBox> > sub_model_list = new ArrayList<DefaultListModel<JCheckBox> >();
         ArrayList<JCheckBoxList> checkBoxList_subtitle_list = new ArrayList<JCheckBoxList>();
        
-        
         int desired_cols = 5;
         int cols = subtitle_streams.size()/desired_cols;
         if(subtitle_streams.size() % desired_cols != 0) cols++;
@@ -300,14 +290,17 @@ public class Tiffy {
         menu_panel.add(scrollpane);
         
         DynamicPane toppane = new DynamicPane();
+        DynamicPane subtitle_pane = new DynamicPane("Verfügbare Untertitel");
         toppane.add(video_panel);
         toppane.add(audio_panel);
         
         for(int i = 0; i <  checkBoxList_subtitle_list.size(); ++i){
         	JPanel subtitle_panel = new JPanel(new BorderLayout());
         	subtitle_panel.add( checkBoxList_subtitle_list.get(i));
-        	toppane.add(subtitle_panel);
+        	subtitle_pane.add(subtitle_panel);
         }
+        
+        toppane.add(subtitle_pane.fin());
 
         menupane.setTopComponent(toppane.fin());
         menupane.setBottomComponent(menu_panel);
