@@ -39,7 +39,6 @@ public class Tiffy {
         frame.setSize(650,850);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
        
-		
 		//set path for runtime, create directory with options in homedirectory
         JFileChooser fr = new JFileChooser();
         String homedir = fr.getFileSystemView().getDefaultDirectory().getPath();
@@ -199,8 +198,8 @@ public class Tiffy {
         JPanel video_panel = new JPanel(new BorderLayout());
         JPanel audio_panel = new JPanel(new BorderLayout());
         
-        JLabel audio_label = new JLabel("Verfügbare Audiospuren");
-        JLabel video_label = new JLabel("Verfügbare Videospuren");
+        JLabel audio_label = new JLabel("Audiospuren");
+        JLabel video_label = new JLabel("Videospuren");
         
         video_panel.add(video_label,BorderLayout.NORTH);
         audio_panel.add(audio_label,BorderLayout.NORTH);
@@ -279,7 +278,8 @@ public class Tiffy {
         bar.add(mode_selection);
         frame.setJMenuBar(bar);
 
-        JSplitPane menupane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        MultiSplitPane menupane = new MultiSplitPane(JSplitPane.VERTICAL_SPLIT);
+        
         JPanel menu_panel = new JPanel();
         JButton button = new JButton(); button.setText("Konvertieren nach");
         JButton stop_button = new JButton(); stop_button.setText("Stop");
@@ -289,21 +289,35 @@ public class Tiffy {
         JScrollPane scrollpane = new JScrollPane(textfeld);      
         menu_panel.add(scrollpane);
         
-        DynamicPane toppane = new DynamicPane();
-        DynamicPane subtitle_pane = new DynamicPane("Verfügbare Untertitel");
-        toppane.add(video_panel);
-        toppane.add(audio_panel);
+        JPanel subtitle_panel = new JPanel(new BorderLayout());
+        JLabel subtitle_label = new JLabel("Untertitel");
+        subtitle_panel.add(subtitle_label,BorderLayout.NORTH);
         
+        MultiSplitPane subitle_multi_pane = new MultiSplitPane(JSplitPane.VERTICAL_SPLIT);
+       
         for(int i = 0; i <  checkBoxList_subtitle_list.size(); ++i){
-        	JPanel subtitle_panel = new JPanel(new BorderLayout());
-        	subtitle_panel.add( checkBoxList_subtitle_list.get(i));
-        	subtitle_pane.add(subtitle_panel);
+        	JPanel sp = new JPanel(new BorderLayout());
+        	sp.add( checkBoxList_subtitle_list.get(i));
+        	subitle_multi_pane.add(sp);
         }
         
-        toppane.add(subtitle_pane.fin());
-
-        menupane.setTopComponent(toppane.fin());
-        menupane.setBottomComponent(menu_panel);
+        subtitle_panel.add(subitle_multi_pane);
+ 
+        MultiSplitPane toppane = new MultiSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        
+        toppane.addComp(video_panel);
+        toppane.addComp(audio_panel);
+        toppane.addComp(subtitle_panel);
+        
+        JPanel progress_panel = new JPanel(new BorderLayout());
+        progress_panel.add(new JLabel("Fortschritt"),BorderLayout.NORTH);
+        	 	
+	 	JProgressBar progress_bar = new JProgressBar(0,100); progress_bar.setValue(0);
+	 	progress_bar.setStringPainted(true);
+       
+        menupane.addComp(toppane);
+        menupane.addComp(progress_bar);
+        menupane.addComp(menu_panel);
         
         new MListener(items,mode_selection);
         
@@ -311,7 +325,7 @@ public class Tiffy {
         System.setOut(printStream);
         System.setErr(printStream);
 
-        new Converter(frame,button,stop_button,mode_selection,ffmpeg_settings_path,jcb,binary_path,movie);
+        new Converter(frame,button,stop_button,progress_bar,mode_selection,ffmpeg_settings_path,jcb,binary_path,movie);
         
         frame.add(menupane);
         frame.setVisible(true);

@@ -11,6 +11,8 @@ import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
+import javax.swing.JOptionPane;
+import javax.swing.JProgressBar;
 
 public class Converter extends JFrame implements ActionListener {
 
@@ -24,10 +26,11 @@ public class Converter extends JFrame implements ActionListener {
 	String binary_path,input, output, settings;
 	JFrame frame; JButton stop;
 	JMenu codec_selection;
+	JProgressBar progress_bar;
 	
-	Converter (JFrame f, JButton _b, JButton _stop , JMenu cs,String _settings, ArrayList<Pair<JCheckBox, DataStream> > _jcb, String bin, String in) {
+	Converter (JFrame f, JButton _b, JButton _stop ,JProgressBar pb , JMenu cs,String _settings, ArrayList<Pair<JCheckBox, DataStream> > _jcb, String bin, String in) {
 		b = _b; jcb = _jcb; binary_path = bin; input = in; frame = f; output = null; stop = _stop; codec_selection = cs;
-		settings = _settings;
+		settings = _settings; progress_bar = pb;
 		b.addActionListener(this);
 	}
 	
@@ -57,6 +60,18 @@ public class Converter extends JFrame implements ActionListener {
 					ex.printStackTrace();
 					return;
 				}
+			 	File does_it_exist = new File(output);
+			 	if(does_it_exist.exists()){
+			 		int n = JOptionPane.showConfirmDialog(
+			 			    frame,
+			 			    "The file already exists. Do you want to overwrite it ?",
+			 			    "Overwrite",
+			 			    JOptionPane.YES_NO_OPTION);
+			 		if(n != 0) {
+			 			return;
+			 		} 
+			 		does_it_exist.delete();
+			 	}
 			 } else return;
 			
 			/*StringBuilder tmp_builder = new StringBuilder("");
@@ -109,7 +124,7 @@ public class Converter extends JFrame implements ActionListener {
 				}
 			}
 			
-			Ffmpeg ffmpeg = new Ffmpeg(binary_path, input, command.toString(), output, frame, stop);
+			Ffmpeg ffmpeg = new Ffmpeg(binary_path, input , command.toString(), output, frame, stop,progress_bar);
 			ffmpeg.start();
 		}
 	}
