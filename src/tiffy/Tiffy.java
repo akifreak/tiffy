@@ -73,6 +73,13 @@ public class Tiffy {
         		binary_path_found = true;
         	}
         	
+        	//check if binary exists
+        	File file = new File(binary_path);
+        	if(!file.exists() || file.isDirectory()) { 
+        	    binary_path_found = false;
+        	    binary_path = null;
+        	}
+        	
         	tmp = Settings.getSetting(ffmpeg_settings_path,"[lastdir]");
         	if(tmp.length >= 1){
         		last_dir = tmp[0];
@@ -254,28 +261,50 @@ public class Tiffy {
 
         JMenuBar bar = new JMenuBar();
        
+        //codec selection
         JMenu mode_selection = null;
         if(codecs.size() >= 1){
         	mode_selection = new JMenu(codecs.get(0));
         } else mode_selection = new JMenu("copy");
         JSeparator sep = new JSeparator();   
   
-        ArrayList<JMenuItem> items = new ArrayList<JMenuItem>();
+        ArrayList<JMenuItem> mode_items = new ArrayList<JMenuItem>();
         
         if(codecs.size() == 0){
         	JMenuItem tmp = new JMenuItem("copy");
-			items.add(tmp);
+        	mode_items.add(tmp);
 			mode_selection.add(tmp); 
         }
         
         for (int j = 0; j < codecs.size();++j){
 			JMenuItem tmp = new JMenuItem(codecs.get(j));
-			items.add(tmp);
+			mode_items.add(tmp);
 			mode_selection.add(tmp); 
 			mode_selection.add(sep);
         }
         
         bar.add(mode_selection);
+        
+        //bitrate
+        JMenu bitrate_selection = null;
+        ArrayList<JMenuItem> bitrate_items = new ArrayList<JMenuItem>();
+        {
+        	int from = 1000, to = 10000, steps = 250, cnt = 0;
+        	bitrate_selection = new JMenu("auto");
+        	{
+            	JMenuItem tmp = new JMenuItem("auto"); 
+            	bitrate_selection.add(tmp);
+            	bitrate_items.add(tmp);
+        	}
+        	for(int i = from; i <= to; i+=steps)
+        	{
+            	JMenuItem tmp = new JMenuItem(Integer.toString(i)); 
+            	bitrate_selection.add(tmp);
+            	bitrate_items.add(tmp);
+        	}
+        }
+        bar.add(bitrate_selection);
+        
         frame.setJMenuBar(bar);
 
         MultiSplitPane menupane = new MultiSplitPane(JSplitPane.VERTICAL_SPLIT);
@@ -319,13 +348,14 @@ public class Tiffy {
         menupane.addComp(progress_bar);
         menupane.addComp(menu_panel);
         
-        new MListener(items,mode_selection);
+        new MListener(mode_items,mode_selection);
+        new MListener(bitrate_items,bitrate_selection);
         
         PrintStream printStream = new PrintStream(new CustomOutputStream(textfeld)); 
         System.setOut(printStream);
         System.setErr(printStream);
 
-        new Converter(frame,button,stop_button,progress_bar,mode_selection,ffmpeg_settings_path,jcb,binary_path,movie);
+        new Converter(frame,button,stop_button,progress_bar,mode_selection,bitrate_selection,ffmpeg_settings_path,jcb,binary_path,movie);
         
         frame.add(menupane);
         frame.setVisible(true);

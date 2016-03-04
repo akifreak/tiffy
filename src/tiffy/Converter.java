@@ -26,11 +26,23 @@ public class Converter extends JFrame implements ActionListener {
 	String binary_path,input, output, settings;
 	JFrame frame; JButton stop;
 	JMenu codec_selection;
+	JMenu bitrate_selection;
 	JProgressBar progress_bar;
 	
-	Converter (JFrame f, JButton _b, JButton _stop ,JProgressBar pb , JMenu cs,String _settings, ArrayList<Pair<JCheckBox, DataStream> > _jcb, String bin, String in) {
-		b = _b; jcb = _jcb; binary_path = bin; input = in; frame = f; output = null; stop = _stop; codec_selection = cs;
-		settings = _settings; progress_bar = pb;
+	Converter (JFrame f, JButton _b, JButton _stop ,JProgressBar pb , 
+			JMenu cs, JMenu bs,String _settings, 
+			ArrayList<Pair<JCheckBox, DataStream> > _jcb, String bin, String in) {
+		b = _b; 
+		jcb = _jcb; 
+		binary_path = bin; 
+		input = in; 
+		frame = f; 
+		output = null; 
+		stop = _stop; 
+		codec_selection = cs; 
+		bitrate_selection = bs;
+		settings = _settings; 
+		progress_bar = pb;
 		b.addActionListener(this);
 	}
 	
@@ -108,6 +120,7 @@ public class Converter extends JFrame implements ActionListener {
 			}
 						
 			String codec = codec_selection.getText();
+			String bitrate = bitrate_selection.getText();
 			
 			//copy everything
 			command.append("-c copy ");
@@ -119,7 +132,13 @@ public class Converter extends JFrame implements ActionListener {
 					//except the video streams
 					if(tmp.second().getClass() == VideoStream.class){
 						//handle video
-						command.append("-c:v:"+tmp.second().b+" "+codec+" ");
+						if(bitrate.equals("auto"))
+						{
+							command.append("-c:v:"+tmp.second().b+" "+codec+" ");	
+						} else {
+							command.append("-c:v:"+tmp.second().b+" "+codec+" -b:v "+bitrate+"k ");
+							//System.out.println("p ==== "+command.toString());
+						}
 					}
 				}
 			}

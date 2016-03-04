@@ -92,6 +92,8 @@ public class Ffmpeg extends Thread {
                     	}
                     }
                     sc.close();
+                    progress_bar.setValue(100);
+                    progress_bar.setString(100+" %");
             	}
 	
             } catch (Throwable t) {
