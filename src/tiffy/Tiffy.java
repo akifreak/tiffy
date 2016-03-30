@@ -7,6 +7,7 @@
 package tiffy;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Image;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
@@ -43,6 +44,7 @@ public class Tiffy {
 		//initialize window
 		JFrame frame = new JFrame("tiffy");  
         frame.setSize(220,220);
+        frame.getContentPane().setBackground(Color.BLUE);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
        
 		//set path for runtime, create directory with options in homedirectory
@@ -226,9 +228,7 @@ public class Tiffy {
         		extensions.add(new Pair<String,String>(containermappings.get(pos).first(),containermappings.get(pos).second()));
         	}
         }
-        
-        frame.setVisible(true);
-        
+
         //make stuff visible for lambda
         final String final_binary_path = binary_path;
         final boolean final_last_dir_found = last_dir_found;
@@ -425,6 +425,24 @@ public class Tiffy {
                         }
                         bar.add(bitrate_selection);
                         
+                        JMenu qualitiy_setting_selection = new JMenu("crf 23");
+                        ArrayList<JMenuItem> qualitiy_setting_items = new ArrayList<JMenuItem>();
+                        
+                        {
+                        	int from = 0, to = 51, steps = 1;
+                        	{
+                            	JMenuItem tmp = new JMenuItem("crf 23"); 
+                            	qualitiy_setting_selection.add(tmp);
+                            	qualitiy_setting_items.add(tmp);
+                        	}
+                        	for(int i = from; i <= to; i+=steps)
+                        	{
+                            	JMenuItem tmp = new JMenuItem("crf "+Integer.toString(i)); 
+                            	qualitiy_setting_selection.add(tmp);
+                            	qualitiy_setting_items.add(tmp);
+                        	}
+                        }
+                        bar.add(qualitiy_setting_selection);
                         JMenu output_format_selection = new JMenu("matroska(*.mkv)");
                         output_format_selection.setName("mkv");
                         ArrayList<JMenuItem> output_format_items = new ArrayList<JMenuItem>();
@@ -448,7 +466,11 @@ public class Tiffy {
                         
                                                 
                         MenuScroller.setScrollerFor(output_format_selection);
+                        MenuScroller.setScrollerFor(qualitiy_setting_selection);
                         bar.add(output_format_selection);
+                        JTextField infotext = new JTextField("crf wird nur bei ''libx264/libx265'' und ''auto'' beachtet");
+                        infotext.setEditable(false);
+                        bar.add(infotext);
                         movie_frame.setJMenuBar(bar);
 
                         MultiSplitPane menupane = new MultiSplitPane(JSplitPane.VERTICAL_SPLIT);
@@ -462,7 +484,9 @@ public class Tiffy {
                         
                         JTextArea textfeld = new JTextArea(40, 50);
                         JScrollPane scrollpane = new JScrollPane(textfeld);      
+                        
                         menu_panel.add(scrollpane);
+                        
                         
                         JPanel subtitle_panel = new JPanel(new BorderLayout());
                         JLabel subtitle_label = new JLabel("Untertitel");
@@ -497,13 +521,14 @@ public class Tiffy {
                         new MListener(mode_items,mode_selection);
                         new MListener(bitrate_items,bitrate_selection);
                         new MListener(output_format_items,output_format_selection);
+                        new MListener(qualitiy_setting_items,qualitiy_setting_selection);
                         
                         PrintStream printStream = new PrintStream(new CustomOutputStream(textfeld)); 
                         System.setOut(printStream);
                         System.setErr(printStream);
 
                         new Converter(frame,button,stop_button,progress_bar,mode_selection,
-                        		bitrate_selection,output_format_selection,ffmpeg_settings_path,jcb,final_binary_path,movie);
+                        		bitrate_selection,output_format_selection,qualitiy_setting_selection,ffmpeg_settings_path,jcb,final_binary_path,movie);
                         
                         movie_frame.add(menupane);
                         movie_frame.setVisible(true);
@@ -519,6 +544,7 @@ public class Tiffy {
         
         JPanel main_panel = new JPanel();
         main_panel.add(dragndrop_label);
+        main_panel.setBackground(Color.WHITE);
         frame.add(main_panel);
         frame.setVisible(true);
 	}
