@@ -53,6 +53,10 @@ public class Converter extends JFrame implements ActionListener {
 		if (e.getSource() == b) {
 			
 			String extension = output_selection.getName();
+			
+			//System.out.println();
+			//System.out.println("os = "+output_selection.getName()+" "+output_selection.getText());
+			
 			String tmp_setting[] = null;
 			try {
 				//tmp_setting = Settings.getSetting(settings,"[convert_to_dir]");
@@ -75,6 +79,13 @@ public class Converter extends JFrame implements ActionListener {
 					ex.printStackTrace();
 					return;
 				}
+			 
+			 	if(!output.endsWith("."+extension))
+			 	{
+			 		output += "."+extension;
+			 		System.out.println("set output to "+output);
+			 	}
+
 			 	File does_it_exist = new File(output);
 			 	if(does_it_exist.exists()){
 			 		int n = JOptionPane.showConfirmDialog(

@@ -141,24 +141,13 @@ public class Tiffy {
         String l=null;
         
         ArrayList<String> encodable = new ArrayList<String>();
-        ArrayList<String> decodable = new ArrayList<String>();
         ArrayList<Pair<String,String>> extensions = new ArrayList<Pair<String,String>>();
         
         try {
 			while((l=stdInput.readLine()) != null) {	
 				String[] splitted = l.trim().split("\\s+");
-				
-				if(splitted[0].equals("DE")){
-    				decodable.add(splitted[1]);
+				if(splitted[0].equals("DE") || splitted[0].equals("E")){
     				encodable.add(splitted[1]);
-				}
-				
-				if(splitted[0].equals("D")){
-    				decodable.add(splitted[1]);
-				}
-				
-				if(splitted[0].equals("E")){
-					encodable.add(splitted[1]);
 				}
 			}
 		} catch (IOException e) {
@@ -166,44 +155,77 @@ public class Tiffy {
 		}
         
         proc.destroy();
+        ArrayList<Pair<String,String>> containermappings = new ArrayList<Pair<String,String>>();
+        ArrayList<String> ignored_containers = new ArrayList<String>();
         
+		try {
+			String[] containermappings_settingsfile = Settings.getSetting(ffmpeg_settings_path,"[container]");
+			String[] ignored_containers_settingsfile = Settings.getSetting(ffmpeg_settings_path, "[container_ignore]");
+			for (int i = 0; i < containermappings_settingsfile.length;++i){
+				String[] splitted = containermappings_settingsfile[i].trim().split("\\s+");		
+				containermappings.add(new Pair<String,String>(splitted[0],splitted[1]));
+			}
+			for (int i = 0; i < ignored_containers_settingsfile.length;++i)
+			{
+				ignored_containers.add(ignored_containers_settingsfile[i]);
+			}
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+
         for(int i = 0; i < encodable.size(); ++i)
         {
-        	try {
-    			proc = rt.exec(binary_path+" -v 1 -h demuxer="+encodable.get(i));
-    		} catch (IOException e) {
-    			e.printStackTrace();
-    		}
+        	if(ignored_containers.contains(encodable.get(i))){
+        		continue;
+        	}
+        	int pos = -1;
+        	for ( int j = 0; j < containermappings.size();++j)
+        	{
+        		if(containermappings.get(j).first().equals(encodable.get(i)))
+        		{
+        			pos = j; 
+        			break;
+        		}
+        	}
+        	if(pos == -1){
+            	try {
+        			proc = rt.exec(binary_path+" -h muxer="+encodable.get(i));
+        		} catch (IOException e) {
+        			e.printStackTrace();
+        		}
 
-            stdInput = new BufferedReader(new 
-                 InputStreamReader(proc.getInputStream()));
-            l=null;
-            try {
-    			while((l=stdInput.readLine()) != null) {
-    				String line = l.trim();
-    				if(line.startsWith("Common extensions")){
-    					line = line.replace("Common extensions:","");
-    					line = line.replace(".","");
-    					line = line.trim();
-    					line = line.replace(","," ");
-    					String[] splitted = line.trim().split("\\s+");
-    					extensions.add(new Pair<String,String>(encodable.get(i),splitted[0]));
-    					
-    				}
-    			}
-    			
-    		} catch (IOException e) {
-    			e.printStackTrace();
-    		}
-            
-            proc.destroy();
-
+                stdInput = new BufferedReader(new 
+                     InputStreamReader(proc.getInputStream()));
+                l=null;
+                try {
+                	boolean has_common_ext = false;
+        			while((l=stdInput.readLine()) != null) {
+        				String line = l.trim();
+        				if(line.startsWith("Common extensions")){
+        					has_common_ext = true;
+        					line = line.replace("Common extensions:","");
+        					line = line.replace(".","");
+        					line = line.trim();
+        					line = line.replace(","," ");
+        					String[] splitted = line.trim().split("\\s+");
+        					extensions.add(new Pair<String,String>(encodable.get(i),splitted[0]));
+        					Settings.appendSetting(ffmpeg_settings_path, "[container]", encodable.get(i)+" "+splitted[0]);
+        					break;
+        				}
+        			}
+        			if(!has_common_ext)
+        			{
+        				Settings.appendSetting(ffmpeg_settings_path, "[container_ignore]", encodable.get(i));
+        			}
+        		} catch (IOException e) {
+        			e.printStackTrace();
+        		}
+                
+                proc.destroy();
+        	} else {
+        		extensions.add(new Pair<String,String>(containermappings.get(pos).first(),containermappings.get(pos).second()));
+        	}
         }
-        
-        /*for(int i = 0; i < extensions.size();++i)
-        {
-        	System.out.println(extensions.get(i).first()+"("+extensions.get(i).second()+")");
-        }*/
         
         frame.setVisible(true);
         
@@ -403,10 +425,11 @@ public class Tiffy {
                         }
                         bar.add(bitrate_selection);
                         
-                        JMenu output_format_selection = new JMenu("matroska(mkv)");
+                        JMenu output_format_selection = new JMenu("matroska(*.mkv)");
+                        output_format_selection.setName("mkv");
                         ArrayList<JMenuItem> output_format_items = new ArrayList<JMenuItem>();
                         {
-                        	JMenuItem tmp = new JMenuItem("matroska(mkv)"); 
+                        	JMenuItem tmp = new JMenuItem("matroska(*.mkv)"); 
                         	tmp.setName("mkv");
                         	output_format_selection.add(tmp);
                         	output_format_items.add(tmp);
@@ -416,7 +439,7 @@ public class Tiffy {
                         {
                         	if(extensions.get(i).first().equals("matroska"))
                         		continue;
-                        	JMenuItem tmp = new JMenuItem(extensions.get(i).first()+"("+extensions.get(i).second()+")"); 
+                        	JMenuItem tmp = new JMenuItem(extensions.get(i).first()+"(*."+extensions.get(i).second()+")"); 
                         	tmp.setName(extensions.get(i).second());
                         	output_format_selection.add(tmp);
                         	output_format_items.add(tmp);
