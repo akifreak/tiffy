@@ -27,10 +27,11 @@ public class Converter extends JFrame implements ActionListener {
 	JFrame frame; JButton stop;
 	JMenu codec_selection;
 	JMenu bitrate_selection;
+	JMenu output_selection;
 	JProgressBar progress_bar;
 	
 	Converter (JFrame f, JButton _b, JButton _stop ,JProgressBar pb , 
-			JMenu cs, JMenu bs,String _settings, 
+			JMenu cs, JMenu bs,JMenu os,String _settings, 
 			ArrayList<Pair<JCheckBox, DataStream> > _jcb, String bin, String in) {
 		b = _b; 
 		jcb = _jcb; 
@@ -41,6 +42,7 @@ public class Converter extends JFrame implements ActionListener {
 		stop = _stop; 
 		codec_selection = cs; 
 		bitrate_selection = bs;
+		output_selection = os;
 		settings = _settings; 
 		progress_bar = pb;
 		b.addActionListener(this);
@@ -50,6 +52,7 @@ public class Converter extends JFrame implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == b) {
 			
+			String extension = output_selection.getName();
 			String tmp_setting[] = null;
 			try {
 				//tmp_setting = Settings.getSetting(settings,"[convert_to_dir]");
@@ -121,6 +124,9 @@ public class Converter extends JFrame implements ActionListener {
 						
 			String codec = codec_selection.getText();
 			String bitrate = bitrate_selection.getText();
+			
+			
+			//System.out.println("extension = "+extension);
 			
 			//copy everything
 			command.append("-c copy ");
