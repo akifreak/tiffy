@@ -28,11 +28,10 @@ public class Converter extends JFrame implements ActionListener {
 	JMenu codec_selection;
 	JMenu bitrate_selection;
 	JMenu output_selection;
-	JMenu quality_selection;
 	JProgressBar progress_bar;
 	
 	Converter (JFrame f, JButton _b, JButton _stop ,JProgressBar pb , 
-			JMenu cs, JMenu bs,JMenu os,JMenu qs,String _settings, 
+			JMenu cs, JMenu bs,JMenu os,String _settings, 
 			ArrayList<Pair<JCheckBox, DataStream> > _jcb, String bin, String in) {
 		b = _b; 
 		jcb = _jcb; 
@@ -44,7 +43,6 @@ public class Converter extends JFrame implements ActionListener {
 		codec_selection = cs; 
 		bitrate_selection = bs;
 		output_selection = os;
-		quality_selection = qs;
 		settings = _settings; 
 		progress_bar = pb;
 		b.addActionListener(this);
@@ -153,11 +151,7 @@ public class Converter extends JFrame implements ActionListener {
 						//handle video
 						if(bitrate.equals("auto"))
 						{
-							if(codec.equals("libx264") || codec.equals("libx265"))
-							{
-								command.append("-c:v:"+tmp.second().b+" "+codec+" -"+quality_selection.getText()+" ");
-							} else
-								command.append("-c:v:"+tmp.second().b+" "+codec+" ");
+							command.append("-c:v:"+tmp.second().b+" "+codec+" ");
 							
 						} else {
 							command.append("-c:v:"+tmp.second().b+" "+codec+" -b:v "+bitrate+"k ");

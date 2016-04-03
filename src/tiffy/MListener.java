@@ -28,7 +28,7 @@ public class MListener extends JFrame implements ActionListener {
 	public void actionPerformed(ActionEvent ae) {
 		for(int j = 0; j < items.size();++j){
 			if(ae.getSource() == items.get(j)){
-				men.setText(items.get(j).getText());
+				men.setText(items.get(j).getName());
 				men.setName(items.get(j).getName());
 			}
 		}

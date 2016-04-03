@@ -73,18 +73,17 @@ public class Tiffy {
         boolean last_dir_found = false;
         boolean binary_path_found = false;
         ArrayList<String> codecs = new ArrayList<String>();
-        try {        	
+        try {        
         	String[] tmp = Settings.getSetting(ffmpeg_settings_path,"[binary]");
         	if(tmp.length >= 1){
         		binary_path = tmp[0];
         		binary_path_found = true;
-        	}
-        	
-        	//check if binary exists
-        	File file = new File(binary_path);
-        	if(!file.exists() || file.isDirectory()) { 
-        	    binary_path_found = false;
-        	    binary_path = null;
+        		File file = new File(binary_path);
+            	//check if file is binary and named ffmpeg.exe
+            	if(!file.exists() || file.isDirectory()) { 
+            	    binary_path_found = false;
+            	    binary_path = null;
+            	}
         	}
         	
         	tmp = Settings.getSetting(ffmpeg_settings_path,"[lastdir]");
@@ -126,7 +125,7 @@ public class Tiffy {
             	continue;
             }
             
-            Settings.appendSetting(ffmpeg_settings_path,"[binary]",binary_path);
+            Settings.changeSetting(ffmpeg_settings_path,"[binary]",binary_path);
             binary_path_found = true;
         }
         Runtime rt = Runtime.getRuntime();
@@ -228,6 +227,40 @@ public class Tiffy {
         		extensions.add(new Pair<String,String>(containermappings.get(pos).first(),containermappings.get(pos).second()));
         	}
         }
+        
+        ArrayList<Pair<String,String>> encoder = new ArrayList<Pair<String,String>>();
+        
+        try {
+			proc = rt.exec(binary_path+" -encoders");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+        stdInput = new BufferedReader(new 
+             InputStreamReader(proc.getInputStream()));
+        l=null;
+        try {
+			while((l=stdInput.readLine()) != null) {
+				
+				if(l.contains("=")) continue;
+				
+				String[] splitted = l.trim().split("\\s+");
+				
+				if(splitted[0].charAt(0) == 'V' && splitted[0].charAt(3) != 'X'){
+					
+					String description = ""; 
+					for (int i = 2; i < splitted.length;++i)
+						description+=splitted[i]+" ";
+					description = description.trim();
+    				encoder.add(new Pair<String,String>(splitted[1],description));
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        
+        /*for(int i = 0; i < encoder.size();++i)
+        	System.out.println(encoder.get(i).first()+" "+encoder.get(i).second());*/
 
         //make stuff visible for lambda
         final String final_binary_path = binary_path;
@@ -396,67 +429,69 @@ public class Tiffy {
                 			mode_selection.add(tmp); 
                         }
                         
-                        for (int j = 0; j < codecs.size();++j){
-                			JMenuItem tmp = new JMenuItem(codecs.get(j));
+                        for(int j = 0; j < encoder.size();++j)
+                        {
+                			JMenuItem tmp = new JMenuItem(encoder.get(j).first()+" ("+encoder.get(j).second()+")");
+                			tmp.setName(encoder.get(j).first());
                 			mode_items.add(tmp);
                 			mode_selection.add(tmp); 
                 			mode_selection.add(sep);
                         }
-                        
+                                                
                         bar.add(mode_selection);
                         
                         //bitrate
                         JMenu bitrate_selection = null;
                         ArrayList<JMenuItem> bitrate_items = new ArrayList<JMenuItem>();
                         {
-                        	int from = 1000, to = 10000, steps = 250, cnt = 0;
+                        	int from = 1000, to = 50000, steps = 250, cnt = 0;
                         	bitrate_selection = new JMenu("auto");
                         	{
                             	JMenuItem tmp = new JMenuItem("auto"); 
+                            	tmp.setName("auto");
                             	bitrate_selection.add(tmp);
                             	bitrate_items.add(tmp);
                         	}
                         	for(int i = from; i <= to; i+=steps)
                         	{
                             	JMenuItem tmp = new JMenuItem(Integer.toString(i)); 
+                            	tmp.setName(Integer.toString(i));
                             	bitrate_selection.add(tmp);
                             	bitrate_items.add(tmp);
                         	}
                         }
+                        
+                       
+                        
+                       // for (int j = 0; j < bitrate_selection.doClick();)
                         bar.add(bitrate_selection);
                         
-                        JMenu qualitiy_setting_selection = new JMenu("crf 23");
+                        /*JMenu qualitiy_setting_selection = new JMenu("crf 23");
                         ArrayList<JMenuItem> qualitiy_setting_items = new ArrayList<JMenuItem>();
                         
                         {
                         	int from = 0, to = 51, steps = 1;
                         	{
                             	JMenuItem tmp = new JMenuItem("crf 23"); 
+                            	tmp.setName("crf 23");
                             	qualitiy_setting_selection.add(tmp);
                             	qualitiy_setting_items.add(tmp);
                         	}
                         	for(int i = from; i <= to; i+=steps)
                         	{
                             	JMenuItem tmp = new JMenuItem("crf "+Integer.toString(i)); 
+                            	tmp.setName("crf "+Integer.toString(i));
                             	qualitiy_setting_selection.add(tmp);
                             	qualitiy_setting_items.add(tmp);
                         	}
                         }
-                        bar.add(qualitiy_setting_selection);
-                        JMenu output_format_selection = new JMenu("matroska(*.mkv)");
+                        bar.add(qualitiy_setting_selection);*/
+                        JMenu output_format_selection = new JMenu("mkv");
                         output_format_selection.setName("mkv");
                         ArrayList<JMenuItem> output_format_items = new ArrayList<JMenuItem>();
-                        {
-                        	JMenuItem tmp = new JMenuItem("matroska(*.mkv)"); 
-                        	tmp.setName("mkv");
-                        	output_format_selection.add(tmp);
-                        	output_format_items.add(tmp);
-                        }
-                        
+
                         for(int i = 0; i < extensions.size();++i)
                         {
-                        	if(extensions.get(i).first().equals("matroska"))
-                        		continue;
                         	JMenuItem tmp = new JMenuItem(extensions.get(i).first()+"(*."+extensions.get(i).second()+")"); 
                         	tmp.setName(extensions.get(i).second());
                         	output_format_selection.add(tmp);
@@ -464,13 +499,14 @@ public class Tiffy {
                         }
                         
                         
-                                                
+                        MenuScroller.setScrollerFor(mode_selection);    
                         MenuScroller.setScrollerFor(output_format_selection);
-                        MenuScroller.setScrollerFor(qualitiy_setting_selection);
+                        MenuScroller.setScrollerFor(bitrate_selection);
+                       // MenuScroller.setScrollerFor(qualitiy_setting_selection);
                         bar.add(output_format_selection);
-                        JTextField infotext = new JTextField("crf wird nur bei ''libx264/libx265'' und ''auto'' beachtet");
-                        infotext.setEditable(false);
-                        bar.add(infotext);
+                        //JTextField infotext = new JTextField("crf wird nur bei ''libx264/libx265'' und ''auto'' beachtet");
+                        //infotext.setEditable(false);
+                        //bar.add(infotext);
                         movie_frame.setJMenuBar(bar);
 
                         MultiSplitPane menupane = new MultiSplitPane(JSplitPane.VERTICAL_SPLIT);
@@ -521,14 +557,32 @@ public class Tiffy {
                         new MListener(mode_items,mode_selection);
                         new MListener(bitrate_items,bitrate_selection);
                         new MListener(output_format_items,output_format_selection);
-                        new MListener(qualitiy_setting_items,qualitiy_setting_selection);
+                        //new MListener(qualitiy_setting_items,qualitiy_setting_selection);
+                        
+                        //default codec
+                        for(int j = 0; j < mode_items.size();++j)
+                        {
+                        	JMenuItem tmp = mode_items.get(j);
+                        	if(tmp.getName().equals("libx264"))
+                        		tmp.doClick();
+                        }
+                        
+                        //default container
+                        for(int j = 0; j < output_format_items.size();++j)
+                        {
+                        	JMenuItem tmp = output_format_items.get(j);
+                        	if(tmp.getName().equals("mkv"))
+                        		tmp.doClick();
+                        }
+                        
+                        
                         
                         PrintStream printStream = new PrintStream(new CustomOutputStream(textfeld)); 
                         System.setOut(printStream);
                         System.setErr(printStream);
 
                         new Converter(frame,button,stop_button,progress_bar,mode_selection,
-                        		bitrate_selection,output_format_selection,qualitiy_setting_selection,ffmpeg_settings_path,jcb,final_binary_path,movie);
+                        		bitrate_selection,output_format_selection,ffmpeg_settings_path,jcb,final_binary_path,movie);
                         
                         movie_frame.add(menupane);
                         movie_frame.setVisible(true);
