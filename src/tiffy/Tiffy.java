@@ -42,7 +42,7 @@ public class Tiffy {
 	public static void main(String[] args) {
 		
 		//initialize window
-		JFrame frame = new JFrame("tiffy");  
+		final JFrame frame = new JFrame("tiffy");  
         frame.setSize(220,220);
         frame.getContentPane().setBackground(Color.BLUE);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -57,7 +57,7 @@ public class Tiffy {
         	ffmpeg_settings_dir.mkdir();
         }
         
-        String ffmpeg_settings_path = homedir+"\\tiffy\\settings.ini"; 
+        final String ffmpeg_settings_path = homedir+"\\tiffy\\settings.ini"; 
         File ffmpeg_settings = new File(ffmpeg_settings_path);
         
         if(!ffmpeg_settings.exists()) {
@@ -72,7 +72,7 @@ public class Tiffy {
         String last_dir = null;
         boolean last_dir_found = false;
         boolean binary_path_found = false;
-        ArrayList<String> codecs = new ArrayList<String>();
+        final ArrayList<String> codecs = new ArrayList<String>();
         try {        
         	String[] tmp = Settings.getSetting(ffmpeg_settings_path,"[binary]");
         	if(tmp.length >= 1){
@@ -142,7 +142,7 @@ public class Tiffy {
         String l=null;
         
         ArrayList<String> encodable = new ArrayList<String>();
-        ArrayList<Pair<String,String>> extensions = new ArrayList<Pair<String,String>>();
+        final ArrayList<Pair<String,String>> extensions = new ArrayList<Pair<String,String>>();
         
         try {
 			while((l=stdInput.readLine()) != null) {	
@@ -228,7 +228,7 @@ public class Tiffy {
         	}
         }
         
-        ArrayList<Pair<String,String>> encoder = new ArrayList<Pair<String,String>>();
+        final ArrayList<Pair<String,String>> encoder = new ArrayList<Pair<String,String>>();
         
         try {
 			proc = rt.exec(binary_path+" -encoders");
