@@ -3,37 +3,23 @@ package tiffy;
 public class VideoStream extends DataStream {
 		int x,y; //resolution
 		
-				
+		//Removes every character between the first char a
+		//and the first char b
+		//assumes that those chars are not nesting
 		private String rebef(String s, char a, char b){
-			
 			StringBuilder tmp = new StringBuilder();		
-			boolean copy = true;		
-			boolean first_one = true;
-			boolean first_two = true;
-		
+			boolean copy = true;
 			for (int i = 0; i < s.length(); ++i){
-				
-				if (s.charAt(i) == a){
-					if(first_one){
-						first_one = false;
-						tmp.append(s.charAt(i));
-					} else {
-						copy = false;
-					}
-					continue;
-				} else if(s.charAt(i) == b){
-					if(first_two)  tmp.append(s.charAt(i));
-					first_two = false; copy = true; continue;
-				}
+				if(s.charAt(i) == a) copy = false;
 				if(copy) tmp.append(s.charAt(i));
+				if(s.charAt(i) == b) copy = true;
 			}
-			
 			return tmp.toString();
 		}
 		
-		
 		VideoStream(String key){
 			super(-1,-1,"unknown");
+			key = key.replaceAll(" ","");
 			x = -1; y = -1;
 			String key_m = rebef(key,'(',')');
 			String[] parts = key_m.split(",");
@@ -41,11 +27,13 @@ public class VideoStream extends DataStream {
 			for (int i = 0; i < parts.length; ++i){
 				parts[i] = parts[i].replaceAll("Video","");
 				parts[i] = parts[i].replaceAll(" ","");
+				
+				System.out.println(parts[i]);
 				if(parts[i].startsWith("Stream#")){
+					
 					String sub = parts[i].substring(7, parts[i].length());	
 					String[] ab = sub.split(":");
 				
-					
 					int fap = ab[1].indexOf("(");
 					a = new Integer(ab[0]).intValue();
 					if(fap != -1)
@@ -61,8 +49,7 @@ public class VideoStream extends DataStream {
 			for (int i = 0; i < parts.length; ++i)
 				parts[i] = parts[i].replaceAll(" ","");
 			{
-				String[] t = parts[2].split("\\[");
-							
+				String[] t = parts[2].split("\\[");		
 				x = new Integer(t[0].substring(0, t[0].indexOf('x') )).intValue();
 				y = new Integer(t[0].substring(t[0].indexOf('x')+1, t[0].length() )).intValue();
 			}
