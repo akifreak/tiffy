@@ -46,9 +46,15 @@ public class Tiffy {
 		
 	public static void main(String[] args) {
 		
+		try {
+			UIManager.setLookAndFeel("com.jtattoo.plaf.hifi.HiFiLookAndFeel");
+		} catch (Exception ex) {
+			return;
+		}
+				
 		//initialize window
 		final JFrame frame = new JFrame("tiffy");  
-        frame.setSize(220,220);
+        frame.setSize(204,280);
         frame.getContentPane().setBackground(Color.BLUE);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
        
@@ -273,10 +279,9 @@ public class Tiffy {
         //make stuff visible for lambda
         final String final_binary_path = binary_path;
         final boolean final_last_dir_found = last_dir_found;
-        
-        ImageIcon icon = new ImageIcon("movie_icon.png",
-                "movie_icon");
-        icon.setImage(icon.getImage().getScaledInstance(197, 163, Image.SCALE_DEFAULT));
+        ImageIcon icon = new ImageIcon("icon.png",
+                "tiffy_icon");
+        icon.setImage(icon.getImage().getScaledInstance(204, 247, Image.SCALE_DEFAULT));
         /*System.out.println("Working Directory = " +
                 System.getProperty("user.dir"));*/
         JLabel dragndrop_label = new JLabel(icon);
