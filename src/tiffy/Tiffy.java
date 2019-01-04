@@ -8,6 +8,7 @@ package tiffy;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
@@ -18,10 +19,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.*;
+import javax.swing.text.NumberFormatter;
 
 
 
@@ -252,7 +257,10 @@ public class Tiffy {
 					for (int i = 2; i < splitted.length;++i)
 						description+=splitted[i]+" ";
 					description = description.trim();
-    				encoder.add(new Pair<String,String>(splitted[1],description));
+					
+					if (description.contains("264") || description.contains("265") || description.contains("hevc")) {
+						encoder.add(new Pair<String,String>(splitted[1],description));
+					}
 				}
 			}
 		} catch (IOException e) {
@@ -441,59 +449,51 @@ public class Tiffy {
                         bar.add(mode_selection);
                         
                         //bitrate
-                        JMenu bitrate_selection = null;
-                        ArrayList<JMenuItem> bitrate_items = new ArrayList<JMenuItem>();
-                        {
-                        	int from = 1000, to = 50000, steps = 250, cnt = 0;
-                        	bitrate_selection = new JMenu("auto");
-                        	{
-                            	JMenuItem tmp = new JMenuItem("auto"); 
-                            	tmp.setName("auto");
-                            	bitrate_selection.add(tmp);
-                            	bitrate_items.add(tmp);
-                        	}
-                        	for(int i = from; i <= to; i+=steps)
-                        	{
-                            	JMenuItem tmp = new JMenuItem(Integer.toString(i)); 
-                            	tmp.setName(Integer.toString(i));
-                            	bitrate_selection.add(tmp);
-                            	bitrate_items.add(tmp);
-                        	}
-                        }
+                        NumberFormat format = DecimalFormat.getInstance();
+                        format.setRoundingMode(RoundingMode.FLOOR);
+                        format.setMinimumFractionDigits(0);
+                        format.setMaximumFractionDigits(2);
+                        format.setGroupingUsed(false);
+                        NumberFormatter formatter = new NumberFormatter(format);
                         
-                       
+                        formatter.setValueClass(Integer.class);
+                        formatter.setMinimum(1);
+                        formatter.setMaximum(Integer.MAX_VALUE);
+                        formatter.setAllowsInvalid(false);
+                        formatter.setCommitsOnValidEdit(true);
                         
-                       // for (int j = 0; j < bitrate_selection.doClick();)
+                        
+                        JFormattedTextField bitrate_selection = new JFormattedTextField(formatter);
+                        bitrate_selection.setValue(new Integer(15000));
+                        
+                        
                         bar.add(bitrate_selection);
+                        bar.add(new JLabel("kb/s"));
                         
-                        /*JMenu qualitiy_setting_selection = new JMenu("crf 23");
-                        ArrayList<JMenuItem> qualitiy_setting_items = new ArrayList<JMenuItem>();
-                        
-                        {
-                        	int from = 0, to = 51, steps = 1;
-                        	{
-                            	JMenuItem tmp = new JMenuItem("crf 23"); 
-                            	tmp.setName("crf 23");
-                            	qualitiy_setting_selection.add(tmp);
-                            	qualitiy_setting_items.add(tmp);
-                        	}
-                        	for(int i = from; i <= to; i+=steps)
-                        	{
-                            	JMenuItem tmp = new JMenuItem("crf "+Integer.toString(i)); 
-                            	tmp.setName("crf "+Integer.toString(i));
-                            	qualitiy_setting_selection.add(tmp);
-                            	qualitiy_setting_items.add(tmp);
-                        	}
-                        }
-                        bar.add(qualitiy_setting_selection);*/
+                     
                         JMenu output_format_selection = new JMenu("mkv");
                         output_format_selection.setName("mkv");
                         ArrayList<JMenuItem> output_format_items = new ArrayList<JMenuItem>();
 
+                        ArrayList<String> wanted_formats = new ArrayList<String>();
+                        
+                        wanted_formats.add("mkv");
+                        wanted_formats.add("mp4");
+                        
                         for(int i = 0; i < extensions.size();++i)
                         {
                         	JMenuItem tmp = new JMenuItem(extensions.get(i).first()+"(*."+extensions.get(i).second()+")"); 
                         	tmp.setName(extensions.get(i).second());
+                        	
+                        	boolean appendIt = false;
+                        	for(int jin = 0; jin < wanted_formats.size(); ++jin) {
+                        		if ( tmp.getText().contains(wanted_formats.get(jin)) ) {
+                        			appendIt = true;
+                        			break;
+                        		}
+                        	}
+                        	
+                        	if(!appendIt) continue;
                         	output_format_selection.add(tmp);
                         	output_format_items.add(tmp);
                         }
@@ -501,7 +501,6 @@ public class Tiffy {
                         
                         MenuScroller.setScrollerFor(mode_selection);    
                         MenuScroller.setScrollerFor(output_format_selection);
-                        MenuScroller.setScrollerFor(bitrate_selection);
                        // MenuScroller.setScrollerFor(qualitiy_setting_selection);
                         bar.add(output_format_selection);
                         //JTextField infotext = new JTextField("crf wird nur bei ''libx264/libx265'' und ''auto'' beachtet");
@@ -555,7 +554,7 @@ public class Tiffy {
                         menupane.addComp(menu_panel);
                         
                         new MListener(mode_items,mode_selection);
-                        new MListener(bitrate_items,bitrate_selection);
+                        //new MListener(bitrate_items,bitrate_selection);
                         new MListener(output_format_items,output_format_selection);
                         //new MListener(qualitiy_setting_items,qualitiy_setting_selection);
                         

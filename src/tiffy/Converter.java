@@ -13,6 +13,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
+import javax.swing.JTextField;
 
 public class Converter extends JFrame implements ActionListener {
 
@@ -26,12 +27,12 @@ public class Converter extends JFrame implements ActionListener {
 	String binary_path,input, output, settings;
 	JFrame frame; JButton stop;
 	JMenu codec_selection;
-	JMenu bitrate_selection;
+	JTextField bitrate_selection;
 	JMenu output_selection;
 	JProgressBar progress_bar;
 	
 	Converter (JFrame f, JButton _b, JButton _stop ,JProgressBar pb , 
-			JMenu cs, JMenu bs,JMenu os,String _settings, 
+			JMenu cs, JTextField bs,JMenu os,String _settings, 
 			ArrayList<Pair<JCheckBox, DataStream> > _jcb, String bin, String in) {
 		b = _b; 
 		jcb = _jcb; 
@@ -136,11 +137,11 @@ public class Converter extends JFrame implements ActionListener {
 			String codec = codec_selection.getText();
 			String bitrate = bitrate_selection.getText();
 			
-			
 			//System.out.println("extension = "+extension);
 			
 			//copy everything
-			command.append("-c copy ");
+			//max muxing queue is a hack to support DolbyTrueHD
+			command.append("-max_muxing_queue_size 512 -c copy ");
 			
 			//specify codecs for streams
 			for (int i = 0; i < jcb.size();++i){
